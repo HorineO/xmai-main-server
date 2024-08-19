@@ -93,14 +93,7 @@ def submit():
 
 if __name__ == "__main__":
     # debug setup
-<<<<<<< HEAD
-    app.run(debug=True, port=88, host="localhost")
-    # wsgi setup
-    """server = pywsgi.WSGIServer(('localhost',88),app)
-    server.serve_forever()"""
-=======
     """app.run(debug=True, port=88, host="localhost")"""
     # wsgi setup
     server = pywsgi.WSGIServer(('localhost',88),app)
     server.serve_forever()
->>>>>>> ff489cd (first commit)
