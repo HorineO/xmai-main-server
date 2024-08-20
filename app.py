@@ -1,5 +1,4 @@
 from flask import Flask, render_template, request
-from markupsafe import escape
 from gevent import pywsgi
 from flask_sqlalchemy import SQLAlchemy
 
