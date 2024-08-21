@@ -10,8 +10,11 @@ app = Flask(
 )
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
+
 """database."""
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///example.db"
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///contact_profile.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -84,7 +87,6 @@ def submit():
     db.session.add(new_user)
     db.session.commit()
 
-    # 在这里处理表单数据，例如保存到数据库或发送邮件
     print(f"Name: {name}, Email: {email}, Message: {message}")
 
     return render_template("contact.html", success=True)
@@ -94,5 +96,5 @@ if __name__ == "__main__":
     # debug setup
     """app.run(debug=True, port=88, host="localhost")"""
     # wsgi setup
-    server = pywsgi.WSGIServer(('localhost',88),app)
+    server = pywsgi.WSGIServer(("localhost", 88), app)
     server.serve_forever()
