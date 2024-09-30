@@ -1,6 +1,8 @@
 from flask import Flask, render_template, request
 from gevent import pywsgi
 from flask_sqlalchemy import SQLAlchemy
+import USERS_DATA as ud
+import os
 
 app = Flask(
     __name__,
@@ -13,26 +15,17 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 """database."""
 
+file_path = "instance/feedback.csv"
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///contact_profile.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-
-db = SQLAlchemy(app)
-
-
-class User(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=False, nullable=False)
-    email = db.Column(db.String(120), unique=False, nullable=False)
-    message = db.Column(db.String(120), unique=False, nullable=False)
-
-    def __repr__(self):
-        return "<User %r>" % self.username
-
-
-with app.app_context():
-    db.create_all()
-
+print('>>> Check if {file_path} is exist ...')
+if os.path.exists(file_path):
+    print(f"file =>{file_path} allready exist")
+    print("done.")
+else:
+    print(f"file =>{file_path} doesn`t exist")
+    print("Initializing {file_path} ...")
+    ud.Init_File(file_path)
+    print("done.")
 
 """docstring for router."""
 
@@ -83,9 +76,7 @@ def submit():
     email = request.form.get("email")
     message = request.form.get("message")
 
-    new_user = User(username=name, email=email, message=message)
-    db.session.add(new_user)
-    db.session.commit()
+    ud.Add_Users(name, email, message, file_path).add()
 
     print(f"Name: {name}, Email: {email}, Message: {message}")
 
@@ -97,4 +88,5 @@ if __name__ == "__main__":
     """app.run(debug=True, port=88, host="localhost")"""
     # wsgi setup
     server = pywsgi.WSGIServer(("localhost", 88), app)
+    print('>>> Service is running')
     server.serve_forever()
