@@ -57,14 +57,14 @@
                     <span class="btn-inner--icon"><i class="fas fa-arrow-left"></i></span>
                   </button>
                   <span class="clearfix"></span>
-                  <h4 class="heading h3 text-white pt-3 pb-5">欢迎回归&nbsp;,<br>
+                  <h4 class="heading h3 text-white pt-3 pb-5">欢迎&nbsp;,<br>
                     请登入您的账户&nbsp;</h4>
-                  <form class="form-primary">
+                  <form class="form-primary" action="/login" method="POST">
                     <div class="form-group">
-                      <input type="email" class="form-control" id="input_email" placeholder="邮箱 / 账户">
+                      <input name="uid" type="uid" class="form-control" id="input_email" placeholder="账户">
                     </div>
                     <div class="form-group">
-                      <input type="password" class="form-control" id="input_password" placeholder="密码">
+                      <input name="pin" type="password" class="form-control" id="input_password" placeholder="密码">
                     </div>
                     <div class="text-right mt-4"><a href="#" class="text-white">忘记密码了? !</a></div>
                     <button type="submit" class="btn btn-block btn-lg bg-white mt-4">登入</button>

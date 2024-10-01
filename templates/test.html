@@ -1,0 +1,28 @@
+<form method="POST" action="/submit">
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <input class="form-control" placeholder="名字" type="text" name="name">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <input class="form-control" placeholder="联系方式如:邮箱/电话" type="text" name="email">
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="form-group">
+                <textarea class="form-control" rows="5" placeholder="你的信息" name="message"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="mt-4">
+        <button type="submit" class="btn btn-primary px-4" onclick="showSuccessMessage()">
+            发送信息
+        </button>
+    </div>
+</form>

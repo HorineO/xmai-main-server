@@ -75,4 +75,26 @@ class Init_File:
 
         with open(self.file_name, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["UID", "PIN", "ACTIVE"])
+            writer.writerow(["UID", "PIN", "ACTIVE", "IDENTITY"])
+
+
+class Identity:
+    def __init__(self, file_name, uid, identity):
+        self.file_name = file_name
+        self.uid = uid
+        self.identity = identity
+
+    def back(self):
+        with open(self.file_name, mode="r", newline="", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            for row in reader:
+                if self.uid in row:
+                    if row[1] == self.identity:
+                        if row[2] == "True":
+                            if row[3] == "admin":
+                                return 1
+                            elif row[3] == "teacher":
+                                return 2
+                            elif row[3] == "student":
+                                return 3
+            return 0

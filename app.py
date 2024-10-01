@@ -16,8 +16,9 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 """database."""
 
 file_path = "instance/feedback.csv"
+user_file_path = "instance/users.csv"
 
-print('>>> Check if {file_path} is exist ...')
+print(">>> Check if {file_path} is exist ...")
 if os.path.exists(file_path):
     print(f"file =>{file_path} allready exist")
     print("done.")
@@ -25,6 +26,16 @@ else:
     print(f"file =>{file_path} doesn`t exist")
     print("Initializing {file_path} ...")
     ud.Init_File(file_path)
+    print("done.")
+
+print(">>> Check if {user_file_path} is exist ...")
+if os.path.exists(user_file_path):
+    print(f"file =>{user_file_path} allready exist")
+    print("done.")
+else:
+    print(f"file =>{user_file_path} doesn`t exist")
+    print("Initializing {user_file_path} ...")
+    ud.Init_File(user_file_path)
     print("done.")
 
 """docstring for router."""
@@ -83,10 +94,25 @@ def submit():
     return render_template("contact.html", success=True)
 
 
+@app.route("/login", methods=["POST"])
+def login():
+    uid = request.form.get("uid")
+    pin = request.form.get("pin")
+
+    print(f"uid: {uid}, pin: {pin}")
+    backdt = ud.Identity(user_file_path, uid, pin).back()
+    if backdt == 1 or backdt == 2 or backdt == 3:
+        return "<h>Succesfully logged in.<h>"
+    else:
+        return "<h>User isn't exist, please contact to the admin.<h>"
+
+
 if __name__ == "__main__":
+    Site = "localhost"
+    Port = 88
     # debug setup
     """app.run(debug=True, port=88, host="localhost")"""
     # wsgi setup
-    server = pywsgi.WSGIServer(("localhost", 88), app)
-    print('>>> Service is running')
+    server = pywsgi.WSGIServer((Site, Port), app)
+    print(f">>> Service is running on http://{Site}:{Port}")
     server.serve_forever()
