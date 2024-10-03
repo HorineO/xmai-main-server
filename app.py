@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
 from gevent import pywsgi
-from flask_sqlalchemy import SQLAlchemy
+from datetime import datetime as dt
 import USERS_DATA as ud
+import END as ed
 import os
 
 app = Flask(
@@ -37,6 +38,7 @@ else:
     print("Initializing {user_file_path} ...")
     ud.Init_File(user_file_path)
     print("done.")
+
 
 """docstring for router."""
 
@@ -101,10 +103,41 @@ def login():
 
     print(f"uid: {uid}, pin: {pin}")
     backdt = ud.Identity(user_file_path, uid, pin).back()
-    if backdt == 1 or backdt == 2 or backdt == 3:
-        return "<h>Succesfully logged in.<h>"
+    """ student 3, teacher 2, admin 1 """
+    if backdt == 3:
+        student_login(uid)
+        return "<h>User successfully logged in.<h>"
+    elif backdt == 2:
+        teacher_login(uid)
+        return ed.show_csv()
+    elif backdt == 1:
+        admin_login(uid)
+        return "<h>User successfully logged in<h>"
     else:
         return "<h>User isn't exist, please contact to the admin.<h>"
+
+
+# return "<h>Succesfully logged in.<h>"
+
+"""docstring for ends."""
+
+
+def student_login(uid):
+    check_date = dt.today()
+    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Student {uid} successfull logged in at {check_date}")
+
+
+def teacher_login(uid):
+    check_date = dt.today()
+    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Teacher {uid} successfull logged in at {check_date}")
+
+
+def admin_login(uid):
+    check_date = dt.today()
+    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Admin {uid} successfull logged in at {check_date}")
 
 
 if __name__ == "__main__":

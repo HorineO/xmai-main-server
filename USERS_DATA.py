@@ -72,10 +72,9 @@ class Row_Specify:
 class Init_File:
     def __init__(self, file_name):
         self.file_name = file_name
-
         with open(self.file_name, "w", newline="") as f:
             writer = csv.writer(f)
-            writer.writerow(["UID", "PIN", "ACTIVE", "IDENTITY"])
+            writer.writerow(["UID", "PIN", "ACTIVE", "IDENTITY", "CHECKED_IN_DATES"])
 
 
 class Identity:
@@ -98,3 +97,24 @@ class Identity:
                             elif row[3] == "student":
                                 return 3
             return 0
+
+
+class Users_Checkin:
+    def __init__(self, file_name, uid, date):
+        self.file_name = file_name
+        self.uid = uid
+        self.date = date
+
+    def checkin(self):
+        with open(self.file_name, mode="r", newline="", encoding="utf-8") as file:
+            reader = csv.reader(file)
+            data = list(reader)
+
+        for i, row in enumerate(data):
+            if row[0] == str(self.uid) and self.date not in data[i][4]:
+                data[i][4] = f"{self.date},{data[i][4]}"
+            # print(row[0])
+
+        with open(self.file_name, mode="w", newline="", encoding="utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerows(data)
