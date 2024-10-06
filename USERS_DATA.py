@@ -1,6 +1,15 @@
 import csv
 
 
+def list_to_string(nested_list):
+    return str(nested_list).replace(" ", "")
+
+
+def string_to_list(nested_string):
+    nested_string = nested_string.replace(" ", "")
+    return eval(nested_string)
+
+
 class Add_Users:
     def __init__(self, uid, pin, active, file_name):
         self.uid = uid
@@ -112,8 +121,7 @@ class Users_Checkin:
 
         for i, row in enumerate(data):
             if row[0] == str(self.uid) and self.date not in data[i][4]:
-                data[i][4] = f"{self.date},{data[i][4]}"
-            # print(row[0])
+                data[i][4] = list_to_string(f"{self.date},{data[i][4]}")
 
         with open(self.file_name, mode="w", newline="", encoding="utf-8") as file:
             writer = csv.writer(file)

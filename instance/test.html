@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV表格展示</title>
+    <!-- 引入Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <h1>CSV表格展示</h1>
+    <div id="csv-table"></div>
+
+    <script>
+        // 使用fetch API获取CSV数据并展示在网页上
+        fetch('/lloo')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('csv-table').innerHTML = data;
+            })
+            .catch(error => console.error('Error:', error));
+    </script>
+</body>
+
+</html>

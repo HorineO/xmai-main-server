@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from gevent import pywsgi
 from datetime import datetime as dt
 import USERS_DATA as ud
@@ -80,6 +80,22 @@ def sign_in():
     return render_template("sign-in.html")
 
 
+@app.route("/teacher_panel/<uid>/<pin>/")
+def teacher_panel(uid, pin):
+    if ud.Identity(user_file_path, uid, pin).back() == 2:
+        return render_template("teacher_panel.html")
+    else:
+        return "<h>Cheers! 🥂<h>"
+
+
+@app.route("/teacher_panel/<uid>/<pin>/<go>")
+def teacher_panel_go(uid, pin, go):
+    if ud.Identity(user_file_path, uid, pin).back() == 2:
+        return render_template(go)
+    else:
+        return "<h>Cheers! 🥂<h>"
+
+
 """docstring for databack."""
 
 
@@ -105,16 +121,24 @@ def login():
     backdt = ud.Identity(user_file_path, uid, pin).back()
     """ student 3, teacher 2, admin 1 """
     if backdt == 3:
-        student_login(uid)
+        student_login(uid, pin)
         return "<h>User successfully logged in.<h>"
     elif backdt == 2:
-        teacher_login(uid)
-        return ed.show_csv()
+        teacher_login(uid, pin)
+        # redirect to /teacher_panel/<uid>/<pin>
+        return redirect(url_for("teacher_panel", uid=uid, pin=pin), code=302)
     elif backdt == 1:
-        admin_login(uid)
+        admin_login(uid, pin)
         return "<h>User successfully logged in<h>"
     else:
         return "<h>User isn't exist, please contact to the admin.<h>"
+
+
+@app.route("/submit_teacherpanel_checkin", methods=["GET"])
+def submit_teacherpanel_checkin():
+    cclass = request.args.get("cclass")
+    print(cclass)
+    return ed.show_csv(cclass)
 
 
 # return "<h>Succesfully logged in.<h>"
@@ -122,19 +146,19 @@ def login():
 """docstring for ends."""
 
 
-def student_login(uid):
+def student_login(uid, pin):
     check_date = dt.today()
     ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
     print(f">>> Student {uid} successfull logged in at {check_date}")
 
 
-def teacher_login(uid):
+def teacher_login(uid, pin):
     check_date = dt.today()
     ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
     print(f">>> Teacher {uid} successfull logged in at {check_date}")
 
 
-def admin_login(uid):
+def admin_login(uid, pin):
     check_date = dt.today()
     ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
     print(f">>> Admin {uid} successfull logged in at {check_date}")
