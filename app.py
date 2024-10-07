@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, jsonify
 from gevent import pywsgi
 from datetime import datetime as dt
 import USERS_DATA as ud
@@ -18,25 +18,45 @@ app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 file_path = "instance/feedback.csv"
 user_file_path = "instance/users.csv"
+exam_file_path = "form_download/"
 
-print(">>> Check if {file_path} is exist ...")
+print(f">>> Check if {file_path} is exist ...")
 if os.path.exists(file_path):
-    print(f"file =>{file_path} allready exist")
+    print(f"file =>{file_path} already exist")
     print("done.")
 else:
-    print(f"file =>{file_path} doesn`t exist")
+    print(f"file =>{file_path} doesn't exist")
     print("Initializing {file_path} ...")
     ud.Init_File(file_path)
     print("done.")
 
-print(">>> Check if {user_file_path} is exist ...")
+print(f">>> Check if {user_file_path} is exist ...")
 if os.path.exists(user_file_path):
-    print(f"file =>{user_file_path} allready exist")
+    print(f"file =>{user_file_path} already exist")
     print("done.")
 else:
-    print(f"file =>{user_file_path} doesn`t exist")
+    print(f"file =>{user_file_path} doesn't exist")
     print("Initializing {user_file_path} ...")
     ud.Init_File(user_file_path)
+    print("done.")
+
+print(f">>> Check if {user_file_path} is exist ...")
+if os.path.exists(user_file_path):
+    print(f"file =>{user_file_path} already exist")
+    print("done.")
+else:
+    print(f"file =>{user_file_path} doesn't exist")
+    print("Initializing {user_file_path} ...")
+    ud.Init_File(user_file_path)
+    print("done.")
+
+print(f">>> Check if {exam_file_path} is exist ...")
+if ed.ensure_directory_exists(exam_file_path) == 0:
+    print(f"file =>{exam_file_path} already exist")
+    print("done.")
+else:
+    print(f"file =>{exam_file_path} doesn't exist")
+    print("Initializing {exam_file_path} ...")
     print("done.")
 
 
@@ -96,6 +116,50 @@ def teacher_panel_go(uid, pin, go):
         return "<h>Cheers! 🥂<h>"
 
 
+@app.route("/student_panel/<uid>/<pin>/")
+def student_panel(uid, pin):
+    if ud.Identity(user_file_path, uid, pin).back() == 3:
+        return render_template("student_panel.html")
+    else:
+        return "<h>Cheers! 🥂<h>"
+
+
+@app.route("/student_panel/<uid>/<pin>/<go>")
+def student_panel_go(uid, pin, go):
+    if ud.Identity(user_file_path, uid, pin).back() == 3:
+        return render_template(go)
+    else:
+        return "<h>Cheers! 🥂<h>"
+
+
+"""form and exam"""
+
+
+@app.route("/student_panel/<uid>/<pin>/form_submit_e/<id>")
+def exam_form_e(uid, pin, id):
+    if ud.Identity(user_file_path, uid, pin).back() == 3:
+        return render_template(".html")
+    else:
+        return "<h>Cheers! 🥂<h>"
+
+
+@app.route("/upload", methods=["POST"])
+def upload_file():
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if file:
+        # Save the file to form_download
+        save_path = "form_download/" + file.filename
+        print(save_path)
+        file.save(save_path)
+        return jsonify({"message": "File uploaded successfully"}), 200
+
+
 """docstring for databack."""
 
 
@@ -122,16 +186,16 @@ def login():
     """ student 3, teacher 2, admin 1 """
     if backdt == 3:
         student_login(uid, pin)
-        return "<h>User successfully logged in.<h>"
+        return redirect(url_for("student_panel", uid=uid, pin=pin), code=302)
     elif backdt == 2:
         teacher_login(uid, pin)
         # redirect to /teacher_panel/<uid>/<pin>
         return redirect(url_for("teacher_panel", uid=uid, pin=pin), code=302)
     elif backdt == 1:
         admin_login(uid, pin)
-        return "<h>User successfully logged in<h>"
+        return "<h>Admin successfully logged in, but why is there nothing here? 😔<h>"
     else:
-        return "<h>User isn't exist, please contact to the admin.<h>"
+        return "<h>User isn't exist, please contact to the admin. Send Email to ohrol@qq.com<h>"
 
 
 @app.route("/submit_teacherpanel_checkin", methods=["GET"])

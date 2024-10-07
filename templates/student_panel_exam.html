@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>教师面板面板</title>
+    <title>学生面板</title>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css?family=Nunito:400,600,700,800|Roboto:400,500,700" rel="stylesheet">
     <!-- Plugins -->
@@ -19,19 +19,19 @@
     <main class="main">
       <aside class="sidebar" id="nav_docs">
         <div class="sidebar-brand">
-          <h1 class="font-weight-400"><a href="."><span class="font-weight-700">教师管理面板</span></a></h1>
+          <h1 class="font-weight-400"><a href="."><span class="font-weight-700">学生管理面板</span></a></h1>
         </div>
         <div class="scrollbar-inner">
           <ul class="navigation pr-3">
-            <li class="navigation-title">管理</li>
+            <li class="navigation-title">项目</li>
             <li class="navigation-item">
               <a href="." class="navigation-link">介绍</a>
             </li>
             <li class="navigation-item">
-              <a href="teacher_panel_checkin.html" class="navigation-link">签到</a>
+              <a href="." class="navigation-link">签到</a>
             </li>
             <li class="navigation-item">
-              <a href="teacher_panel_plugins.html" class="navigation-link">插件</a>
+              <a href="student_panel_exam.html" class="navigation-link">考试与答卷</a> 
             </li>
             
           </ul>
@@ -43,9 +43,37 @@
             <div class="pt-3 pb-4 mb-4 border-bottom">
               <div class="row">
                 <div class="col-lg-6">
-                  <h2 class="heading h2 font-weight-bold">介绍</h2>
-                  <p>Hey! 这里是教师管理面板</p>
-                  <a href="http://github.com/HorineO/xmai-main-server" target="_blank">项目地址</a>
+                  <h2 class="heading h2 font-weight-bold">考试与问卷</h2>
+                  <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" id="fileInput" name="file"/>
+                    <br>
+                    <br>
+                    <button type="button" onclick="uploadFile()" class="btn btn-primary btn-block">上传文件</button>
+                  </form>
+                  
+                  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+                  <script>
+                    function uploadFile() {
+                      var formData = new FormData();
+                      var fileInput = document.getElementById('fileInput');
+                      var file = fileInput.files[0];
+                      formData.append('file', file);
+
+                      $.ajax({
+                        url: '/upload',  // Flask后端的路由
+                        type: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        success: function (response) {
+                          alert('文件上传成功');
+                        },
+                        error: function (error) {
+                          alert('文件上传失败');
+                        }
+                      });
+                    }
+                  </script>
                 </div>
               </div>
             </div>
