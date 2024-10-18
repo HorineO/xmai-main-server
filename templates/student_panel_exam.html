@@ -59,8 +59,10 @@
                       var file = fileInput.files[0];
                       formData.append('file', file);
 
+                      console.log(window.location.href + '/upload');
                       $.ajax({
-                        url: '/upload',  // Flask后端的路由
+                        
+                        url: window.location.href + '/upload', // connect the urls then upload
                         type: 'POST',
                         data: formData,
                         processData: false,

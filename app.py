@@ -14,58 +14,31 @@ app = Flask(
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
-"""database."""
-
-file_path = "instance/feedback.csv"
-user_file_path = "instance/users.csv"
-exam_file_path = "form_download/"
-
-print(f">>> Check if {file_path} is exist ...")
-if os.path.exists(file_path):
-    print(f"file =>{file_path} already exist")
-    print("done.")
-else:
-    print(f"file =>{file_path} doesn't exist")
-    print("Initializing {file_path} ...")
-    ud.Init_File(file_path)
-    print("done.")
-
-print(f">>> Check if {user_file_path} is exist ...")
-if os.path.exists(user_file_path):
-    print(f"file =>{user_file_path} already exist")
-    print("done.")
-else:
-    print(f"file =>{user_file_path} doesn't exist")
-    print("Initializing {user_file_path} ...")
-    ud.Init_File(user_file_path)
-    print("done.")
-
-print(f">>> Check if {user_file_path} is exist ...")
-if os.path.exists(user_file_path):
-    print(f"file =>{user_file_path} already exist")
-    print("done.")
-else:
-    print(f"file =>{user_file_path} doesn't exist")
-    print("Initializing {user_file_path} ...")
-    ud.Init_File(user_file_path)
-    print("done.")
-
-print(f">>> Check if {exam_file_path} is exist ...")
-if ed.ensure_directory_exists(exam_file_path) == 0:
-    print(f"file =>{exam_file_path} already exist")
-    print("done.")
-else:
-    print(f"file =>{exam_file_path} doesn't exist")
-    print("Initializing {exam_file_path} ...")
-    print("done.")
+# 检查并初始化文件
+def check_and_init_file(file_path, init_func):
+    if os.path.exists(file_path):
+        print(f"file => {file_path} already exist")
+    else:
+        print(f"file => {file_path} doesn't exist")
+        print(f"Initializing {file_path} ...")
+        init_func(file_path)
+        print("done.")
 
 
-"""docstring for router."""
+file_paths = [
+    ("instance/feedback.csv", ud.Init_File),
+    ("instance/users.csv", ud.Init_File),
+    ("form_download/", ed.ensure_directory_exists),
+]
+
+for file_path, init_func in file_paths:
+    check_and_init_file(file_path, init_func)
 
 
+# 路由定义
 @app.route("/pages/404")
 @app.route("/pages/404.html")
-def error():
+def error_404():
     return render_template("404.html")
 
 
@@ -102,7 +75,7 @@ def sign_in():
 
 @app.route("/teacher_panel/<uid>/<pin>/")
 def teacher_panel(uid, pin):
-    if ud.Identity(user_file_path, uid, pin).back() == 2:
+    if ud.Identity("instance/users.csv", uid, pin).back() == 2:
         return render_template("teacher_panel.html")
     else:
         return "<h>Cheers! 🥂<h>"
@@ -110,7 +83,7 @@ def teacher_panel(uid, pin):
 
 @app.route("/teacher_panel/<uid>/<pin>/<go>")
 def teacher_panel_go(uid, pin, go):
-    if ud.Identity(user_file_path, uid, pin).back() == 2:
+    if ud.Identity("instance/users.csv", uid, pin).back() == 2:
         return render_template(go)
     else:
         return "<h>Cheers! 🥂<h>"
@@ -118,7 +91,7 @@ def teacher_panel_go(uid, pin, go):
 
 @app.route("/student_panel/<uid>/<pin>/")
 def student_panel(uid, pin):
-    if ud.Identity(user_file_path, uid, pin).back() == 3:
+    if ud.Identity("instance/users.csv", uid, pin).back() == 3:
         return render_template("student_panel.html")
     else:
         return "<h>Cheers! 🥂<h>"
@@ -126,25 +99,16 @@ def student_panel(uid, pin):
 
 @app.route("/student_panel/<uid>/<pin>/<go>")
 def student_panel_go(uid, pin, go):
-    if ud.Identity(user_file_path, uid, pin).back() == 3:
+    if ud.Identity("instance/users.csv", uid, pin).back() == 3:
         return render_template(go)
     else:
         return "<h>Cheers! 🥂<h>"
 
 
-"""form and exam"""
-
-
-@app.route("/student_panel/<uid>/<pin>/form_submit_e/<id>")
-def exam_form_e(uid, pin, id):
-    if ud.Identity(user_file_path, uid, pin).back() == 3:
-        return render_template(".html")
-    else:
-        return "<h>Cheers! 🥂<h>"
-
-
-@app.route("/upload", methods=["POST"])
-def upload_file():
+@app.route(
+    "/student_panel/<uid>/<pin>/student_panel_exam.html/upload", methods=["POST"]
+)
+def upload_file(uid, pin):
     if "file" not in request.files:
         return jsonify({"error": "No file part"}), 400
 
@@ -153,14 +117,9 @@ def upload_file():
         return jsonify({"error": "No selected file"}), 400
 
     if file:
-        # Save the file to form_download
-        save_path = "form_download/" + file.filename
-        print(save_path)
+        save_path = f"form_download/{uid} {pin} {file.filename}"
         file.save(save_path)
         return jsonify({"message": "File uploaded successfully"}), 200
-
-
-"""docstring for databack."""
 
 
 @app.route("/submit", methods=["POST"])
@@ -169,7 +128,7 @@ def submit():
     email = request.form.get("email")
     message = request.form.get("message")
 
-    ud.Add_Users(name, email, message, file_path).add()
+    ud.Add_Users(name, email, message, "instance/feedback.csv").add()
 
     print(f"Name: {name}, Email: {email}, Message: {message}")
 
@@ -181,59 +140,47 @@ def login():
     uid = request.form.get("uid")
     pin = request.form.get("pin")
 
-    print(f"uid: {uid}, pin: {pin}")
-    backdt = ud.Identity(user_file_path, uid, pin).back()
-    """ student 3, teacher 2, admin 1 """
+    backdt = ud.Identity("instance/users.csv", uid, pin).back()
     if backdt == 3:
         student_login(uid, pin)
         return redirect(url_for("student_panel", uid=uid, pin=pin), code=302)
     elif backdt == 2:
         teacher_login(uid, pin)
-        # redirect to /teacher_panel/<uid>/<pin>
         return redirect(url_for("teacher_panel", uid=uid, pin=pin), code=302)
     elif backdt == 1:
         admin_login(uid, pin)
         return "<h>Admin successfully logged in, but why is there nothing here? 😔<h>"
     else:
-        return "<h>User isn't exist, please contact to the admin. Send Email to ohrol@qq.com<h>"
+        return "<h>User isn't exist, please contact to the admin.<h>"
 
 
 @app.route("/submit_teacherpanel_checkin", methods=["GET"])
 def submit_teacherpanel_checkin():
     cclass = request.args.get("cclass")
-    print(cclass)
     return ed.show_csv(cclass)
-
-
-# return "<h>Succesfully logged in.<h>"
-
-"""docstring for ends."""
 
 
 def student_login(uid, pin):
     check_date = dt.today()
-    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
-    print(f">>> Student {uid} successfull logged in at {check_date}")
+    ud.Users_Checkin("instance/users.csv", uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Student {uid} successfully logged in at {check_date}")
 
 
 def teacher_login(uid, pin):
     check_date = dt.today()
-    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
-    print(f">>> Teacher {uid} successfull logged in at {check_date}")
+    ud.Users_Checkin("instance/users.csv", uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Teacher {uid} successfully logged in at {check_date}")
 
 
 def admin_login(uid, pin):
     check_date = dt.today()
-    ud.Users_Checkin(user_file_path, uid, check_date.strftime("%Y%m%d")).checkin()
-    print(f">>> Admin {uid} successfull logged in at {check_date}")
+    ud.Users_Checkin("instance/users.csv", uid, check_date.strftime("%Y%m%d")).checkin()
+    print(f">>> Admin {uid} successfully logged in at {check_date}")
 
 
 if __name__ == "__main__":
     Site = "localhost"
     Port = 88
-    # debug setup
-    """app.run(debug=True, port=88, host="localhost")"""
-    # wsgi setup
     server = pywsgi.WSGIServer((Site, Port), app)
     print(f">>> Service is running on http://{Site}:{Port}")
     server.serve_forever()
