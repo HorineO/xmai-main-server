@@ -43,11 +43,11 @@
             <div class="pt-3 pb-4 mb-4 border-bottom">
               <div class="row">
                 <div class="col-lg-6">
-                  <h2 class="heading h2 font-weight-bold">签到</h2>
+                  <h2 class="heading h2 font-weight-bold">答卷</h2>
                   <br>
-                  <form id="teacherPanelForm" action="/submit_teacherpanel_checkin" method="post">
-                    <label for="cclass">查找班别</label><br>
-                    <input type="text" id="cclass" name="cclass" style="height: 41px;">
+                  <form id="teacherPanelForm" action="/submit_teacherpanel_form" method="post">
+                    <label for="fclass">查找班别</label><br>
+                    <input type="text" id="fclass" name="fclass" style="height: 41px;">
                     <button type="button" class="btn btn-primary" onclick="fetchData()">搜索</button>
                     <br>
                     <div class="form-text text-muted">输入样式: 比如"202003"</div>
@@ -77,13 +77,13 @@
                   
                     <script>
                       function fetchData() {
-                        const cclass = document.getElementById('cclass').value;
-                        if (!cclass) {
+                        const fclass = document.getElementById('fclass').value;
+                        if (!fclass) {
                           alert('请输入班别');
                           return;
                         }
 
-                        fetch(`/submit_teacherpanel_checkin?cclass=${cclass}`)
+                        fetch(`/submit_teacherpanel_form?fclass=${fclass}`)
                           .then(response => response.json())
                           .then(data => {
                             if (!Array.isArray(data)) {

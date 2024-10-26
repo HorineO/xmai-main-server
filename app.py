@@ -4,6 +4,7 @@ from datetime import datetime as dt
 import USERS_DATA as ud
 import END as ed
 import os
+import exam as ex
 
 app = Flask(
     __name__,
@@ -14,7 +15,7 @@ app = Flask(
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 
-# 检查并初始化文件
+# Check and initialize file
 def check_and_init_file(file_path, init_func):
     if os.path.exists(file_path):
         print(f"file => {file_path} already exist")
@@ -29,13 +30,14 @@ file_paths = [
     ("instance/feedback.csv", ud.Init_File),
     ("instance/users.csv", ud.Init_File),
     ("form_download/", ed.ensure_directory_exists),
+    ("form_output/", ed.ensure_directory_exists),
 ]
 
 for file_path, init_func in file_paths:
     check_and_init_file(file_path, init_func)
 
 
-# 路由定义
+# Route definitions
 @app.route("/pages/404")
 @app.route("/pages/404.html")
 def error_404():
@@ -117,9 +119,12 @@ def upload_file(uid, pin):
         return jsonify({"error": "No selected file"}), 400
 
     if file:
-        save_path = f"form_download/{uid} {pin} {file.filename}"
-        file.save(save_path)
-        return jsonify({"message": "File uploaded successfully"}), 200
+        if ud.Identity("instance/users.csv", uid, pin).back() == 3:
+            save_path = f"form_download/{uid} {pin} {file.filename}"
+            file.save(save_path)
+            return jsonify({"message": "File uploaded successfully"}), 200
+        else:
+            return jsonify({"error": "Unauthorized access"}), 403
 
 
 @app.route("/submit", methods=["POST"])
@@ -157,7 +162,15 @@ def login():
 @app.route("/submit_teacherpanel_checkin", methods=["GET"])
 def submit_teacherpanel_checkin():
     cclass = request.args.get("cclass")
+    print(cclass)
     return ed.show_csv(cclass)
+
+
+@app.route("/lete")
+@app.route("/submit_teacherpanel_form", methods=["GET"])
+def submit_teacherpanel_form():
+    fclass = request.args.get("fclass")
+    return ex.show_student_info(fclass)
 
 
 def student_login(uid, pin):
